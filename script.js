@@ -15,62 +15,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // CONFIGURATION (Developers update this)
+    // CONFIGURATION
     const REDIRECT_URL = 'thank-you.html';
-    
-    // OPTION A: If using a Webhook (e.g., n8n, Zapier)
-    const WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE'; 
+    const WEBHOOK_URL = 'https://n8n-bopk.onrender.com/webhook/25708ab7-93b3-461e-b34b-adc71ed033b4';
 
-    form.addEventListener('submit', function(e) {
-        // Prevent default HTML form submission behavior
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const email = emailInput.value;
         const originalBtnText = submitBtn.innerText;
 
         // Visual feedback
-        submitBtn.innerText = 'Sending...';
+        submitBtn.innerText = 'Изпращане...';
         submitBtn.disabled = true;
 
-        /* 
-           --- LOGIC BRANCH ---
-           If you are using an Embedded Form from MailerLite/Convertkit, 
-           you likely won't need this JS file at all (you would replace the HTML form).
-           
-           If you are using a custom POST to a webhook, uncomment the fetch block below.
-        */
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            });
 
-        // START WEBHOOK LOGIC (Uncomment to use)
-        /*
-        fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: email, source: 'lead_magnet_page' }),
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.href = REDIRECT_URL;
-            } else {
-                alert('Something went wrong. Please try again.');
-                submitBtn.innerText = originalBtnText;
-                submitBtn.disabled = false;
-            }
-        })
-        .catch(error => {
+            // Redirect to Thank You page after successful submission
+            window.location.href = REDIRECT_URL;
+
+        } catch (error) {
             console.error('Error:', error);
-            alert('Error submitting form.');
+            alert('Възникна грешка при изпращането. Моля, опитайте отново.');
             submitBtn.innerText = originalBtnText;
             submitBtn.disabled = false;
-        });
-        */
-        // END WEBHOOK LOGIC
-
-        // FOR DEMO PURPOSES ONLY (Delete this block when integrating real backend)
-        setTimeout(() => {
-            console.log(`Email captured: ${email}`);
-            window.location.href = REDIRECT_URL;
-        }, 1000);
+        }
     });
 });
